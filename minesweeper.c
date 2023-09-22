@@ -1,42 +1,93 @@
 #include <stdio.h>
 #include <string.h>
+vi
 
+
+#define MAXTOKENCOUNT 20
+#define MAXTOKENLENGTH 20
+#define MAXLINELENGTH 400
 
 // for new 10 20 50
 
-int main(void){
-     char cmd[20]; 
-     char token[10][80];
-     char * ptr;
-     int r,c,m;
-     int tcount = 0;
+void getinput(char line[],int linelen){
+  fgets(line,linelen,stdin);
+    int len = strlen(linelen);
+    if(line[len-1] = '\n') line[len-1] = '\0';
 
+    printf("Returned : %s", line);
+
+
+}
+
+void gettokens(char line[], char tokens[MAXTOKENCOUNT][MAXTOKENLENGTH],int * count){
+    char linecpy = line[MAXLINELENGTH];
+    strcpy(linecpy,line);
+
+    char * ptr;
+
+    ptr = strtok(linecpy," ");
+    
+   
+     while(ptr != NULL){
+        strcpy(tokens[*count],ptr);
+
+         ptr = strtok(NULL, " ");
+         *count++;
+     }
+}
+
+ int processcommand(char tokens[][MAXTOKENLENGTH], int tokencount){
+    if(strcmp(tokens[0],"new") == 0 ){
+        printf("NEW COMMAND CHOSEN");
+    }
+    else if(strcmp(tokens[0],"show") == 0){
+        printf(" SHOW COMMAND CHOSEN");
+    }
+    else if (strcmp(tokens[0],"quit" == 0)){
+        printf(" QUIT COMMAND CHOSEN");
+        return 0;
+    }
+   
+    return 1;
+ }
+
+void rungame(){
+
+     /* Initialized values for simple input collecting */
+     char cmd[MAXLINELENGTH];   // array of char to take in input
+     char token[MAXTOKENCOUNT][MAXTOKENLENGTH];  // matrix to take in tokenized strings
+
+     int result;
+
+
+     char * ptr;  // pointer for strtok and travel through tokenization
+     int r,c,m; // values for rows column,
+     int tcount = 0; // how many tokens there are, so we can place into proper
+
+   // GAME STATE
 
   while(1){
 
      printf(">> ");
-     fgets(cmd,80,stdin);
-     cmd[strlen(cmd)-1] = '\0';
-     printf("Entered %s\n", cmd);
+     getinput(cmd,MAXLINELENGTH);
+     gettokens(cmd, token, &tcount);
+    result = processcommand(tokens,tcount);
 
-     ptr = strtok(cmd," "); // first argu is string to token, second call is NULL, to distinguished
-     while( ptr != NULL){
-         strcpy(token[tcount],ptr);
-         tcount++;
-         ptr = strtok(NULL, " ");
-     }
-       for(int i = 0 ; i<tcount; i++){
-       	printf("token %d = %s\n", i, token[i]);
-       }
-      
+     if(result == 0) break;
+    
+
+
      
-
-      //if(strcpy(cmd, "quit") == 0)
-      	// scanf has no error catching
-
-        if(strcpy(token[0],"new") == 0)
-        	 printf("ERROR");
+      
      }
+
+     //END OF GAME STATE
+
+}
+
+int main(void){
+
+    rungame();
     system("pause");
 	return 0;
 }
