@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-vi
+
 
 
 #define MAXTOKENCOUNT 20
@@ -8,6 +8,24 @@ vi
 #define MAXLINELENGTH 400
 
 // for new 10 20 50
+
+// Global Cell struct
+
+  struct Cell {
+        int position;
+
+        int flagged;
+
+        int adjcount;
+
+        int mine;
+
+        int covered;
+
+     }; typedef struct Cell cell;
+
+
+  
 
 void getinput(char line[],int linelen){
   fgets(line,linelen,stdin);
@@ -35,6 +53,7 @@ void gettokens(char line[], char tokens[MAXTOKENCOUNT][MAXTOKENLENGTH],int * cou
          *count++;
      }
 }
+
 
  int processcommand(char tokens[][MAXTOKENLENGTH], int tokencount){
     if(strcmp(tokens[0],"new") == 0 ){
@@ -64,6 +83,10 @@ void rungame(){
      int r,c,m; // values for rows column,
      int tcount = 0; // how many tokens there are, so we can place into proper
 
+      
+
+
+
    // GAME STATE
 
   while(1){
@@ -71,9 +94,9 @@ void rungame(){
      printf(">> ");
      getinput(cmd,MAXLINELENGTH);
      gettokens(cmd, token, &tcount);
-    result = processcommand(tokens,tcount);
+     result = processcommand(token,tcount);
 
-     if(result == 0) break;
+     //if(result == 0) break;
     
 
 
