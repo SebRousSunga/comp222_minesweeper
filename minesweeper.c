@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 
@@ -7,9 +8,11 @@
 #define MAXTOKENLENGTH 20
 #define MAXLINELENGTH 400
 
-// for new 10 20 50
+
 
 // Global Cell struct
+ 
+   
 
   struct Cell {
         int position;
@@ -24,12 +27,17 @@
 
      }; typedef struct Cell cell;
 
+     cell **board;
+     int rows;
+     int cols;
+     int mines;
 
-  
+
+ // Functions  
 
 void getinput(char line[],int linelen){
   fgets(line,linelen,stdin);
-    int len = strlen(linelen);
+    int len = strlen(line);
     if(line[len-1] = '\n') line[len-1] = '\0';
 
     printf("Returned : %s", line);
@@ -37,9 +45,9 @@ void getinput(char line[],int linelen){
 
 }
 
-void gettokens(char line[], char tokens[MAXTOKENCOUNT][MAXTOKENLENGTH],int * count){
-    char linecpy = line[MAXLINELENGTH];
-    strcpy(linecpy,line);
+  void gettokens(char line[], char tokens[MAXTOKENCOUNT][MAXTOKENLENGTH],int * count){
+      char linecpy[MAXLINELENGTH];
+      strcpy(linecpy,line);
 
     char * ptr;
 
@@ -49,26 +57,70 @@ void gettokens(char line[], char tokens[MAXTOKENCOUNT][MAXTOKENLENGTH],int * cou
      while(ptr != NULL){
         strcpy(tokens[*count],ptr);
 
-         ptr = strtok(NULL, " ");
-         *count++;
+        ptr = strtok(NULL, " ");
+         (*count)++;
      }
 }
 
+     void display_cell(cell * c){
+         // printf("%4d",c->position);
+        printf("3s","/");
+    }
 
- int processcommand(char tokens[][MAXTOKENLENGTH], int tokencount){
+ 
+
+ void command_new(int r, int c, int m){  // Make board, 
+
+    board = (cell **) malloc(sizeof(cell *) * r);
+
+    for(int i = 0 ; i < r; i++){
+        board[i] = (cell *) malloc(sizeof(cell) * c);
+    }
+
+      for(int i = 0 ; i< rows; i++){
+        for(int j = 0 ; j <cols; j++){
+            board[i][j].position = i * cols + j;
+        }
+      }
+
+        
+     }
+  void command_show(){
+        for(int i = 0 ; i < rows; i++){
+            for(int j = 0 ; j<cols; j++){
+                display_cell(&board[i][j]);
+            }
+            printf("\n");
+        }
+       }
+  
+
+
+
+
+  int processcommand(char tokens[MAXTOKENCOUNT][MAXTOKENLENGTH], int * tokencount){
     if(strcmp(tokens[0],"new") == 0 ){
-        printf("NEW COMMAND CHOSEN");
+        printf("NEW COMMAND CHOSEN");       
+        rows = atoi(tokens[1]);
+        cols = atoi(tokens[2]);
+        mines = atoi(tokens[3]);
+        command_new(rows,cols,mines);
     }
     else if(strcmp(tokens[0],"show") == 0){
         printf(" SHOW COMMAND CHOSEN");
+        command_show();
     }
-    else if (strcmp(tokens[0],"quit" == 0)){
+    else if (strcmp(tokens[0],"quit") == 0){
         printf(" QUIT COMMAND CHOSEN");
         return 0;
     }
    
     return 1;
  }
+
+ 
+   
+ 
 
 void rungame(){
 
@@ -80,8 +132,8 @@ void rungame(){
 
 
      char * ptr;  // pointer for strtok and travel through tokenization
-     int r,c,m; // values for rows column,
-     int tcount = 0; // how many tokens there are, so we can place into proper
+     
+      // how many tokens there are, so we can place into proper
 
       
 
@@ -90,13 +142,13 @@ void rungame(){
    // GAME STATE
 
   while(1){
-
+     int tcount = 0;
      printf(">> ");
      getinput(cmd,MAXLINELENGTH);
      gettokens(cmd, token, &tcount);
-     result = processcommand(token,tcount);
-
-     //if(result == 0) break;
+     result = processcommand(token,&tcount);
+ 
+    // printf("%d", result);
     
 
 
@@ -111,6 +163,16 @@ void rungame(){
 int main(void){
 
     rungame();
-    system("pause");
 	return 0;
 }
+
+
+/* Things to do
+   Need to implement board
+
+   Figure out the why. I persume it's a seg fault
+
+
+
+
+*/
