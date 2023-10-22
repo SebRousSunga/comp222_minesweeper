@@ -8,12 +8,16 @@
 #define MAXTOKENLENGTH 20
 #define MAXLINELENGTH 400
 
+// ******************* PART 1 **************************** \\
+// Part 1 of minesweeper project for COMP 222
+// Abilty to tokenize and read in user input and implement a system to output based on user input
+
 
 
 // Global Cell struct
  
    
-
+// Cell struct that contains all cell information 
   struct Cell {
         int position;
 
@@ -33,7 +37,9 @@
      int mines;
 
 
- // Functions  
+
+
+ /// Functions  
 
 void getinput(char line[],int linelen){
   fgets(line,linelen,stdin);
@@ -51,7 +57,7 @@ void getinput(char line[],int linelen){
 
     char * ptr;
 
-    ptr = strtok(linecpy," ");
+    ptr = strtok(linecpy," "); // Go through string, separate when reaching divisor
     
    
      while(ptr != NULL){
@@ -67,7 +73,7 @@ void getinput(char line[],int linelen){
         printf("3s","/");
     }
 
- 
+// Initizlize board 
 
  void command_new(int r, int c, int m){  // Make board, 
 
@@ -100,18 +106,18 @@ void getinput(char line[],int linelen){
 
   int processcommand(char tokens[MAXTOKENCOUNT][MAXTOKENLENGTH], int * tokencount){
     if(strcmp(tokens[0],"new") == 0 ){
-        printf("NEW COMMAND CHOSEN");       
+        printf("NEW COMMAND CHOSEN\n");       
         rows = atoi(tokens[1]);
         cols = atoi(tokens[2]);
         mines = atoi(tokens[3]);
-        command_new(rows,cols,mines);
+        command_new(rows,cols,mines); // Create game board using a cell** board, a pointer to pointers essentailly
     }
     else if(strcmp(tokens[0],"show") == 0){
-        printf(" SHOW COMMAND CHOSEN");
+        printf(" SHOW COMMAND CHOSEN\n");
         command_show();
     }
     else if (strcmp(tokens[0],"quit") == 0){
-        printf(" QUIT COMMAND CHOSEN");
+        printf(" QUIT COMMAND CHOSEN\n");
         return 0;
     }
    
@@ -120,7 +126,7 @@ void getinput(char line[],int linelen){
 
  
    
- 
+ // Game state function
 
 void rungame(){
 
@@ -128,7 +134,7 @@ void rungame(){
      char cmd[MAXLINELENGTH];   // array of char to take in input
      char token[MAXTOKENCOUNT][MAXTOKENLENGTH];  // matrix to take in tokenized strings
 
-     int result;
+     int result; // 
 
 
      char * ptr;  // pointer for strtok and travel through tokenization
@@ -144,11 +150,13 @@ void rungame(){
   while(1){
      int tcount = 0;
      printf(">> ");
-     getinput(cmd,MAXLINELENGTH);
-     gettokens(cmd, token, &tcount);
+     getinput(cmd,MAXLINELENGTH); //read user input and puts them into cmd and token arrays
+     gettokens(cmd, token, &tcount); // takes input into cpy to separate commands into separate parts ot token array
      result = processcommand(token,&tcount);
- 
-    // printf("%d", result);
+     if(result == 0){ // quit command returns zero to exit gamestate
+        break;
+     }
+   
     
 
 
@@ -160,17 +168,22 @@ void rungame(){
 
 }
 
+///End of functions
+
 int main(void){
 
     rungame();
-	return 0;
+	return 0; 
 }
 
 
 /* Things to do
-   Need to implement board
+   Create command_new and command_show function <--- DONE
+   Set up mine laying algorithim and adjacency count for game logic setup <--- IN-PROGRESS
+   Create full game logic for player usage <--- N/A
+   Error handling of User-input <--- N/A
 
-   Figure out the why. I persume it's a seg fault
+   
 
 
 
