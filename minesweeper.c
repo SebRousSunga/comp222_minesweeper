@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 
@@ -35,11 +36,19 @@
      int rows;
      int cols;
      int mines;
+     int m_r; 
+     int m_c;
+
+
 
 
 
 
  /// Functions  
+
+ int get_rand(int range){
+    return ((int)floor((float)range*rand()/RAND_MAX))%range;
+ }    
 
 void getinput(char line[],int linelen){
   fgets(line,linelen,stdin);
@@ -73,6 +82,13 @@ void getinput(char line[],int linelen){
         printf("3s","/");
     }
 
+// Get adjacency count of cell
+int get_adj_count(){
+    int neighbors = 8; // eight neighbors of cell
+    int row_neigh = {-1,-1,0,1,1,1,0,-1};
+    int col_neigh = { 0, 1,1,1,0,-1,-1,-1};
+};  
+
 // Initizlize board 
 
  void command_new(int r, int c, int m){  // Make board, 
@@ -86,11 +102,27 @@ void getinput(char line[],int linelen){
       for(int i = 0 ; i< rows; i++){
         for(int j = 0 ; j <cols; j++){
             board[i][j].position = i * cols + j;
+            board[i][j].mine = 0;
+            board[i][j].covered = 0;
+            board[i][j].flagged = 0;
         }
-      }
+      } //Start mine laying
+        for(int m = 0; m < mines; m++){
+            m_r = get_rand(r);
+            m_c = get_rand(c);
+            while(board[m_r][m_c].mine == 1){
+                m_r = get_rand(r);
+                m_c = get_rand(c);
+            }
+            board[m_r][m_c].mine 1;
+        }
+
+
 
         
      }
+
+///////      
   void command_show(){
         for(int i = 0 ; i < rows; i++){
             for(int j = 0 ; j<cols; j++){
@@ -133,6 +165,7 @@ void rungame(){
      /* Initialized values for simple input collecting */
      char cmd[MAXLINELENGTH];   // array of char to take in input
      char token[MAXTOKENCOUNT][MAXTOKENLENGTH];  // matrix to take in tokenized strings
+     srand(time(0));
 
      int result; // 
 
@@ -182,9 +215,9 @@ int main(void){
    Set up mine laying algorithim and adjacency count for game logic setup <--- IN-PROGRESS
    Create full game logic for player usage <--- N/A
    Error handling of User-input <--- N/A
-
+   adjacentcy count shows how many of the 
    
-
+    if uncovered cell is not mined, then show adjacency count, which is how many neighbors are mined.Assume neighbors are 0,2,3,..,8 is for each direction
 
 
 
