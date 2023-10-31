@@ -26,7 +26,7 @@
 
         int adjcount;
 
-        int mine;
+        int mined;
 
         int covered;
 
@@ -78,16 +78,37 @@ void getinput(char line[],int linelen){
 }
 
      void display_cell(cell * c){
-         // printf("%4d",c->position);
-        printf("3s","/");
+         if(c->mined == 1) printf("%2s","*");
+         else if(c->adjcount == 0) printf("%2s", ".");
+         else printf("%2d",c->adjcount);
     }
 
+  
+
 // Get adjacency count of cell
-int get_adj_count(){
+int get_adj_count(int r, int c){
     int neighbors = 8; // eight neighbors of cell
-    int row_neigh = {-1,-1,0,1,1,1,0,-1};
-    int col_neigh = { 0, 1,1,1,0,-1,-1,-1};
+    int row_neigh[] = {-1,-1,0,1,1,1,0,-1};
+    int col_neigh[] = { 0, 1,1,1,0,-1,-1,-1};
+    int minecount = 0;
+    for(int i = 0; i < neighbors ; i++){
+        int rn = r + row_neigh[i];
+        int cn = c + col_neigh[i];
+      if(rn >= 0 && rn < rows && cn >= 0 && cn < rows){
+         if(board[rn][cn].mined == 1)
+            minecount++;
+      }  
+    }
+     return minecount;
 };  
+
+void init_cell(cell * cell, int p){
+    cell->position = p;
+    cell->mined = 0;
+    cell->covered = 0;
+    cell->flagged = 0;
+    cell->adjcount = 0;
+}
 
 // Initizlize board 
 
@@ -101,23 +122,26 @@ int get_adj_count(){
 
       for(int i = 0 ; i< rows; i++){
         for(int j = 0 ; j <cols; j++){
-            board[i][j].position = i * cols + j;
-            board[i][j].mine = 0;
-            board[i][j].covered = 0;
-            board[i][j].flagged = 0;
+            int position = i * cols + j;
+            init_cell(&board[i][j], position);
+
+           
         }
       } //Start mine laying
         for(int m = 0; m < mines; m++){
             m_r = get_rand(r);
             m_c = get_rand(c);
-            while(board[m_r][m_c].mine == 1){
+            while(board[m_r][m_c].mined == 1){
                 m_r = get_rand(r);
                 m_c = get_rand(c);
             }
-            board[m_r][m_c].mine 1;
+            board[m_r][m_c].mined = 1;
         }
-
-
+      for(int a_rr = 0 ; a_rr < r ; a_rr++){
+        for(int a_cc = 0; a_cc < c ; a_cc++){
+       board[a_rr][a_cc].adjcount = get_adj_count(a_rr,a_cc); // set cell's adjacency count
+         }
+     }
 
         
      }
