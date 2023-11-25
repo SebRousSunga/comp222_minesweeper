@@ -78,8 +78,10 @@ void getinput(char line[],int linelen){
 }
 
      void display_cell(cell * c){
-         if(c->mined == 1) printf("%2s","*");
-         else if(c->adjcount == 0) printf("%2s", ".");
+         if(c->covered == 1) printf("%2s","/");
+         else if(c->mined == 1) printf("%2s", "*");
+         else if (c->flagged == 1) printf("%2s", "P");
+         else if (c->adjcount == 0) printf("%2s", ".");
          else printf("%2d",c->adjcount);
     }
 
@@ -105,7 +107,7 @@ int get_adj_count(int r, int c){
 void init_cell(cell * cell, int p){
     cell->position = p;
     cell->mined = 0;
-    cell->covered = 0;
+    cell->covered = 1;
     cell->flagged = 0;
     cell->adjcount = 0;
 }
@@ -146,6 +148,25 @@ void init_cell(cell * cell, int p){
         
      }
 
+ void command_uncover(int r, int c){
+     
+     board[r][c].covered = 0;
+ }
+
+ void command_flag(int r, int c){
+     board[r][c].covered = 0;
+     board[r][c].flagged = 1;
+     if(board[r][c].mined == 1)
+     board[r][c].mined = 0;
+ }
+
+ void command_unflag(int r, int c){
+    
+    board[r][c].covered = 1;
+    board[r][c].flagged = 0;
+    
+ }
+
 ///////      
   void command_show(){
         for(int i = 0 ; i < rows; i++){
@@ -175,6 +196,35 @@ void init_cell(cell * cell, int p){
     else if (strcmp(tokens[0],"quit") == 0){
         printf(" QUIT COMMAND CHOSEN\n");
         return 0;
+    }
+
+    else if(strcmp(tokens[0], "uncover") == 0){
+        int unc_r = atoi(tokens[1]);
+        int unc_c = atoi(tokens[2]);
+
+        unc_r--;
+        unc_c--;
+        if(board[unc_r][unc_c].mined == 1)
+            printf("You lose! Make new board \n");
+        else 
+        command_uncover(unc_r, unc_c);
+
+    }
+
+    else if (strcmp(tokens[0], "flag") == 0){
+        int flag_r = atoi(tokens[1]);
+        int flag_c = atoi(tokens[2]);
+        flag_r = flag_r - 1;
+        flag_c = flag_c - 1;
+        command_flag(flag_r, flag_c);
+    }
+
+    else if (strcmp(tokens[0], "unflag") == 0){
+        int flag_r = atoi(tokens[1]);
+        int flag_c = atoi(tokens[2]);
+        flag_r = flag_r - 1;
+        flag_c = flag_c - 1;
+        command_unflag(flag_r, flag_c);
     }
    
     return 1;
