@@ -39,6 +39,13 @@
      int m_r; 
      int m_c;
 
+     int curr_row;
+     int curr_col;
+
+    int neighbors = 8; // eight neighbors of cell
+    int row_neigh[] = {-1,-1,0,1,1,1,0,-1};
+    int col_neigh[] = { 0, 1,1,1,0,-1,-1,-1};
+
 
 
 
@@ -78,18 +85,20 @@ void getinput(char line[],int linelen){
 }
 
      void display_cell(cell * c){
-         if(c->mined == 1) printf("%2s","*");
-         else if(c->adjcount == 0) printf("%2s", ".");
-         else printf("%2d",c->adjcount);
+         if(c->covered == 1) printf("%2s","/");
+         else if(c->mined == 1) printf("%2s", "*");
+         else if (c->flagged == 1) printf("%2s", "P");
+         else if(c->adjcount > 0) printf("%2s", c->adjcount);
+         else printf("%2s", ".");
+         
+         
     }
 
   
 
 // Get adjacency count of cell
 int get_adj_count(int r, int c){
-    int neighbors = 8; // eight neighbors of cell
-    int row_neigh[] = {-1,-1,0,1,1,1,0,-1};
-    int col_neigh[] = { 0, 1,1,1,0,-1,-1,-1};
+    
     int minecount = 0;
     for(int i = 0; i < neighbors ; i++){
         int rn = r + row_neigh[i];
@@ -105,10 +114,24 @@ int get_adj_count(int r, int c){
 void init_cell(cell * cell, int p){
     cell->position = p;
     cell->mined = 0;
-    cell->covered = 0;
+    cell->covered = 1;
     cell->flagged = 0;
     cell->adjcount = 0;
 }
+  void coverall(){  //test function to cover entire board. 
+    for(int i = 0 ; i < rows ; i++){
+        for(int j = 0 ; j < cols; j++)
+            board[i][j].covered = 1 ;
+    }
+  }
+
+   void showall(){
+    for(int i = 0 ; i < rows ; i++){
+        for(int j = 0 ; j < cols; j++)
+            board[i][j].covered = 0 ;
+    }
+
+   }
 
 // Initizlize board 
 
@@ -155,6 +178,44 @@ void init_cell(cell * cell, int p){
             printf("\n");
         }
        }
+
+      void uncover_recursion(int r, int c){
+
+      }
+
+    void command_uncover(int r, int c){
+          //Some form of error checking so that user input is within bounds of game
+          if(r <= rows && c <= cols){
+            if(board[r][c].mined == 1)
+                printf("MINED. GAME OVER");
+            
+            else if(board[r][c].adjcount != 0){
+                board[r][c].covered = 0;
+                return;
+
+            }
+        }
+        else
+            printf("Input outside of board range. Try another. \n");
+    }
+
+    void command_flag(int r, int c){
+        if(r <= rows && c <= cols){
+        board[r][c].flagged = 1;
+        board[r][c].mined = 0;
+        board[r][c].covered = 0;
+      }
+      else
+       printf("Input outside of board range. Try another. \n");  
+    }
+
+    void command_unflag(int r, int c){
+        if(r <=rows && c <= cols)
+            board[r][c].flagged = 0;
+        else
+            printf("Input outside of board range. \n");
+        
+    }
   
 
 
@@ -162,19 +223,40 @@ void init_cell(cell * cell, int p){
 
   int processcommand(char tokens[MAXTOKENCOUNT][MAXTOKENLENGTH], int * tokencount){
     if(strcmp(tokens[0],"new") == 0 ){
-        printf("NEW COMMAND CHOSEN\n");       
+              
         rows = atoi(tokens[1]);
         cols = atoi(tokens[2]);
         mines = atoi(tokens[3]);
         command_new(rows,cols,mines); // Create game board using a cell** board, a pointer to pointers essentailly
     }
     else if(strcmp(tokens[0],"show") == 0){
-        printf(" SHOW COMMAND CHOSEN\n");
+        printf("\n");
         command_show();
     }
+
+    else if (strcmp(tokens[0], "uncover") == 0){
+        
+          int r_g = atoi(tokens[1]); //- 1;
+          int c_g = atoi(tokens[2]); //- 1 ;
+          r_g = r_g - 1;
+          c_g = c_g - 1;
+          command_uncover(r_g,c_g);
+
+    }
+
+    else if (strcmp(tokens[0], "flag") == 0){
+        int r_f = atoi(tokens[1]) - 1 ;
+        int c_f = atoi(tokens[2]) - 1;
+        command_flag(r_f, c_f);
+    }
+
     else if (strcmp(tokens[0],"quit") == 0){
-        printf(" QUIT COMMAND CHOSEN\n");
+        
         return 0;
+    }
+
+    else if (strcmp(tokens[0], "showall") == 0){
+        showall();
     }
    
     return 1;
