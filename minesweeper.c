@@ -39,6 +39,12 @@
      int m_r; 
      int m_c;
 
+    int neighbors = 8; // eight neighbors of cell
+    int row_neigh[] = {-1,-1,0,1,1,1,0,-1};
+    int col_neigh[] = { 0, 1,1,1,0,-1,-1,-1};
+
+    int unc_neigh_r;
+    int unc_neight_c;
 
 
 
@@ -55,7 +61,7 @@ void getinput(char line[],int linelen){
     int len = strlen(line);
     if(line[len-1] = '\n') line[len-1] = '\0';
 
-    printf("Returned : %s", line);
+    printf("Returned : %s \n", line);
 
 
 }
@@ -79,8 +85,8 @@ void getinput(char line[],int linelen){
 
      void display_cell(cell * c){
          if(c->covered == 1) printf("%2s","/");
-         else if(c->mined == 1) printf("%2s", "*");
          else if (c->flagged == 1) printf("%2s", "P");
+         else if(c->mined == 1) printf("%2s", "*"); 
          else if (c->adjcount == 0) printf("%2s", ".");
          else printf("%2d",c->adjcount);
     }
@@ -89,9 +95,7 @@ void getinput(char line[],int linelen){
 
 // Get adjacency count of cell
 int get_adj_count(int r, int c){
-    int neighbors = 8; // eight neighbors of cell
-    int row_neigh[] = {-1,-1,0,1,1,1,0,-1};
-    int col_neigh[] = { 0, 1,1,1,0,-1,-1,-1};
+    
     int minecount = 0;
     for(int i = 0; i < neighbors ; i++){
         int rn = r + row_neigh[i];
@@ -115,6 +119,8 @@ void init_cell(cell * cell, int p){
 // Initizlize board 
 
  void command_new(int r, int c, int m){  // Make board, 
+    if(board != NULL)
+        free(board);
 
     board = (cell **) malloc(sizeof(cell *) * r);
 
@@ -148,16 +154,50 @@ void init_cell(cell * cell, int p){
         
      }
 
+// Function to check for win condition. Return 1 for win, 0 to continue with game
+     
+int check_win(){
+    for(int i = 0; i < rows; i++){
+        for(int j = 0 ; j < cols; j++){
+            if(board[i][j].mined == 1 && board[i][j].flagged == 0) return 0;
+            
+            else if(board[i][j].mined == 0 && board[i][j].covered == 1) return 0;
+        }
+    }
+    return 1;
+}
+
  void command_uncover(int r, int c){
      
      board[r][c].covered = 0;
+     if(board[r][c].adjcount == 0){
+            for(int i = 0; i < neighbors; i++){
+                
+                if( r + row_neigh[i] >= 0 && c + col_neigh[i] >= 0){
+                     unc_neigh_r = r + row_neigh[i];
+                     unc_neight_c = c + col_neigh[i];
+                  if( (unc_neigh_r <= rows && unc_neight_c <= cols ) && ( board[unc_neigh_r][unc_neight_c].covered == 1))
+                    command_uncover(unc_neigh_r,unc_neight_c);
+                    
+                   }
+
+            }                          //iterate through neighbors
+     }
+
+     if(check_win() == 1)
+        printf("YOU WIN BRO! \n");
  }
 
+  
  void command_flag(int r, int c){
      board[r][c].covered = 0;
      board[r][c].flagged = 1;
      if(board[r][c].mined == 1)
-     board[r][c].mined = 0;
+     board[r][c].mined = 1;
+
+    if(check_win() == 1)
+      printf("YOU WIN BRO! \n");
+     
  }
 
  void command_unflag(int r, int c){
@@ -166,6 +206,7 @@ void init_cell(cell * cell, int p){
     board[r][c].flagged = 0;
     
  }
+        
 
 ///////      
   void command_show(){
@@ -176,6 +217,23 @@ void init_cell(cell * cell, int p){
             printf("\n");
         }
        }
+
+ void secret_show(){
+    for(int i = 0 ; i < rows; i++){
+        for(int j = 0 ; j < cols; j++){
+            board[i][j].covered = 0;
+        }
+    }
+ }
+
+  void secret_cover(){
+    for(int i = 0 ; i < rows; i++){
+        for(int j = 0 ; j < cols; j++){
+            board[i][j].covered = 1;
+        }
+    }
+ }
+  
   
 
 
@@ -183,18 +241,18 @@ void init_cell(cell * cell, int p){
 
   int processcommand(char tokens[MAXTOKENCOUNT][MAXTOKENLENGTH], int * tokencount){
     if(strcmp(tokens[0],"new") == 0 ){
-        printf("NEW COMMAND CHOSEN\n");       
+              
         rows = atoi(tokens[1]);
         cols = atoi(tokens[2]);
         mines = atoi(tokens[3]);
         command_new(rows,cols,mines); // Create game board using a cell** board, a pointer to pointers essentailly
     }
     else if(strcmp(tokens[0],"show") == 0){
-        printf(" SHOW COMMAND CHOSEN\n");
+        
         command_show();
     }
     else if (strcmp(tokens[0],"quit") == 0){
-        printf(" QUIT COMMAND CHOSEN\n");
+        
         return 0;
     }
 
@@ -204,8 +262,10 @@ void init_cell(cell * cell, int p){
 
         unc_r--;
         unc_c--;
-        if(board[unc_r][unc_c].mined == 1)
+        if(board[unc_r][unc_c].mined == 1){
             printf("You lose! Make new board \n");
+            return 0;
+        }
         else 
         command_uncover(unc_r, unc_c);
 
@@ -226,6 +286,16 @@ void init_cell(cell * cell, int p){
         flag_c = flag_c - 1;
         command_unflag(flag_r, flag_c);
     }
+
+    else if (strcmp(tokens[0], "secret") == 0){ // Help with debugging
+        secret_show();
+        command_show();
+    }
+
+    else if (strcmp(tokens[0], "hide") == 0){ // Help with debugging
+        secret_cover();
+        command_show();
+    }
    
     return 1;
  }
@@ -239,7 +309,9 @@ void rungame(){
      /* Initialized values for simple input collecting */
      char cmd[MAXLINELENGTH];   // array of char to take in input
      char token[MAXTOKENCOUNT][MAXTOKENLENGTH];  // matrix to take in tokenized strings
+     board = NULL;
      srand(time(0));
+
 
      int result; // 
 
