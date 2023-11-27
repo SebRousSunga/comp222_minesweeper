@@ -9,9 +9,9 @@
 #define MAXTOKENLENGTH 20
 #define MAXLINELENGTH 400
 
-// ******************* PART 1 **************************** \\
-// Part 1 of minesweeper project for COMP 222
-// Abilty to tokenize and read in user input and implement a system to output based on user input
+// ******************* PART 3 **************************** \\
+// Create the uncover function + win condition AND error checking
+// 
 
 
 
@@ -31,20 +31,20 @@
         int covered;
 
      }; typedef struct Cell cell;
-
+//Global functions
      cell **board;
      int rows;
      int cols;
      int mines;
-     int m_r; 
-     int m_c;
+     int m_r; // mined_row cell for mine laying function
+     int m_c; // mined_col cell for mine laying funciton
 
     int neighbors = 8; // eight neighbors of cell
     int row_neigh[] = {-1,-1,0,1,1,1,0,-1};
     int col_neigh[] = { 0, 1,1,1,0,-1,-1,-1};
 
-    int unc_neigh_r;
-    int unc_neight_c;
+    int unc_neigh_r;  // for checking neighbor of uncovered cell
+    int unc_neight_c; // for checking neighbor of uncovered cell
 
 
 
@@ -52,14 +52,14 @@
 
  /// Functions  
 
- int get_rand(int range){
+ int get_rand(int range){ //generic random num function for mine laying
     return ((int)floor((float)range*rand()/RAND_MAX))%range;
  }    
 
-void getinput(char line[],int linelen){
+void getinput(char line[],int linelen){ //get user input for later tokenization
   fgets(line,linelen,stdin);
     int len = strlen(line);
-    if(line[len-1] = '\n') line[len-1] = '\0';
+    if(line[len-1] == '\n') line[len-1] = '\0'; // I know it's assignment then actual com
 
     printf("Returned : %s \n", line);
 
@@ -166,7 +166,7 @@ int check_win(){
     }
     return 1;
 }
-
+//Function to uncover cell, already did mine checking in process_command. Benefits unknown.
  void command_uncover(int r, int c){
      
      board[r][c].covered = 0;
@@ -176,8 +176,8 @@ int check_win(){
                 if( r + row_neigh[i] >= 0 && c + col_neigh[i] >= 0){
                      unc_neigh_r = r + row_neigh[i];
                      unc_neight_c = c + col_neigh[i];
-                  if( (unc_neigh_r <= rows && unc_neight_c <= cols ) && ( board[unc_neigh_r][unc_neight_c].covered == 1))
-                    command_uncover(unc_neigh_r,unc_neight_c);
+                  if( (unc_neigh_r < rows && unc_neight_c < cols ) && ( board[unc_neigh_r][unc_neight_c].covered == 1))
+                    command_uncover(unc_neigh_r,unc_neight_c); // iterate through neighbors and those neighbors' neighbors if adjcount is 0
                     
                    }
 
