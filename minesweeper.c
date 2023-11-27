@@ -2,12 +2,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <ctype.h>
+#include <time.h>
 
 
 
 #define MAXTOKENCOUNT 20
 #define MAXTOKENLENGTH 20
 #define MAXLINELENGTH 400
+#define LEGALCMDNUM 6
 
 // ******************* PART 3 **************************** \\
 // Create the uncover function + win condition AND error checking
@@ -21,13 +24,9 @@
 // Cell struct that contains all cell information 
   struct Cell {
         int position;
-
         int flagged;
-
         int adjcount;
-
         int mined;
-
         int covered;
 
      }; typedef struct Cell cell;
@@ -40,13 +39,14 @@
      int m_c; // mined_col cell for mine laying funciton
 
     int neighbors = 8; // eight neighbors of cell
-    int row_neigh[] = {-1,-1,0,1,1,1,0,-1};
-    int col_neigh[] = { 0, 1,1,1,0,-1,-1,-1};
+   const int row_neigh[] = {-1,-1,0,1,1,1,0,-1};
+   const int col_neigh[] = { 0, 1,1,1,0,-1,-1,-1};
 
     int unc_neigh_r;  // for checking neighbor of uncovered cell
     int unc_neight_c; // for checking neighbor of uncovered cell
 
-
+   const char * legal_cmds[LEGALCMDNUM] = {"new", "show" , "quit", "uncover", "flag" , "unflag"};
+   const  int num_arg[6] = { 3,0,0,2,2,2 };
 
 
 
@@ -119,7 +119,7 @@ void init_cell(cell * cell, int p){
 // Initizlize board 
 
  void command_new(int r, int c, int m){  // Make board, 
-    if(board != NULL)
+    if(board != NULL) // if board already exists, free space and make new one. 
         free(board);
 
     board = (cell **) malloc(sizeof(cell *) * r);
@@ -218,7 +218,7 @@ int check_win(){
         }
        }
 
- void secret_show(){
+ void secret_show(){ //debug command purely for testing. Ignore otherwise.
     for(int i = 0 ; i < rows; i++){
         for(int j = 0 ; j < cols; j++){
             board[i][j].covered = 0;
@@ -226,7 +226,7 @@ int check_win(){
     }
  }
 
-  void secret_cover(){
+  void secret_cover(){  // <-- debug command purely for testing. Ignore otherwise.
     for(int i = 0 ; i < rows; i++){
         for(int j = 0 ; j < cols; j++){
             board[i][j].covered = 1;
@@ -262,8 +262,12 @@ int check_win(){
 
         unc_r--;
         unc_c--;
-        if(board[unc_r][unc_c].mined == 1){
+        if(unc_r > 10 || unc_c > 10)
+            printf("Not in range of game board.\n");
+        else if(board[unc_r][unc_c].mined == 1){
             printf("You lose! Make new board \n");
+            secret_show();   // just done so you can see the board when defeated.
+            command_show();  //
             return 0;
         }
         else 
@@ -300,6 +304,15 @@ int check_win(){
     return 1;
  }
 
+ int alldigits(char* s) {
+    int len = strlen(s);
+    for (int i = 0; i < len; i++) {
+        if(!isdigit(s[i])) return 0;
+    }
+    return 1; // not digit, error
+}
+
+
  
    
  // Game state function
@@ -328,10 +341,37 @@ void rungame(){
 
   while(1){
      int tcount = 0;
+     int legalcmd_count = 0;
+     int corr_arg_count = 0;
      printf(">> ");
      getinput(cmd,MAXLINELENGTH); //read user input and puts them into cmd and token arrays
      gettokens(cmd, token, &tcount); // takes input into cpy to separate commands into separate parts ot token array
-     result = processcommand(token,&tcount);
+
+      for(int i = 0; i<LEGALCMDNUM; i++){
+        if(strcmp(token[0],legal_cmds[i]) == 0)
+            legalcmd_count++;
+     }
+
+
+        for (int i = 0; i < 6; i++) {
+            if ((tcount - 1) == num_arg[i])
+                corr_arg_count++;
+        }
+
+        if (legalcmd_count > 0 && corr_arg_count > 0){
+            if (alldigits(token[1]) == 1 && alldigits(token[2]) == 1 && alldigits(token[3]) == 1)
+                result = processcommand(token, &tcount);
+            else {
+                result = 1;
+                printf("number given isn't a digit \n");
+            }
+        }
+
+       else{
+        result = 1; //continue loop
+        printf("Illegal command!\n");
+    }
+      
      if(result == 0){ // quit command returns zero to exit gamestate
         break;
      }
